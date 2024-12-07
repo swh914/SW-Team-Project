@@ -1,1 +1,1 @@
-# SW-Team-Project
+SW 개발 환경 및 응용 팀 프로젝트
