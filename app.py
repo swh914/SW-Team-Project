@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 # Firebase 서비스 계정 키 파일 경로
-cred = credentials.Certificate("C:/Users/cic/Desktop/SWproject/serviceAccountKey.json")
+cred = credentials.Certificate("C:/Users/0914s/Desktop/SWproject/serviceAccountKey.json")
 
 # Firebase 초기화
 firebase_admin.initialize_app(cred, {
@@ -12,12 +12,13 @@ firebase_admin.initialize_app(cred, {
 print("Firebase 초기화 완료")
 
 # 데이터 쓰기 함수
-def write_data(name, price, status):
+def write_data(name, price, status, category):
     ref = db.reference('items')  # 'items' 경로 참조
     ref.push({
         'name': name,
         'price': price,
-        'status': status
+        'status': status,
+        'category': category  # 카테고리 추가
     })
 
     print(f"{name}이(가) 데이터베이스에 성공적으로 추가되었습니다.")
@@ -29,9 +30,19 @@ def read_data():
     print("\n데이터베이스에 저장된 아이템 목록:")
     if data:
         for key, item in data.items():
-            print(f"{item['name']} - {item['price']}원 - {item['status']}")
+            print(f"{item['name']} - {item['price']}원 - {item['status']} - {item['category']}")
     else:
         print("데이터베이스에 저장된 아이템이 없습니다.")
+
+# 카테고리 목록
+categories = [
+    "디지털/가전", "가구/인테리어", "유아동/유아도서", "생활/가공식품",
+    "여성의류/잡화", "뷰티/미용", "남성의류/잡화", "스포츠/레저",
+    "게임/취미", "도서/티켓/음반", "반려동물용품", "기타", "삽니다"
+]
+
+# 상태 목록
+statuses = ["판매중", "판매완료"]
 
 # 터미널 입력을 통해 아이템 등록하는 함수
 def register_item():
@@ -42,12 +53,37 @@ def register_item():
             break
 
         try:
-            price = int(input("아이템 가격 입력: "))
-            status = input("아이템 상태 입력 (판매중/판매완료): ")
+            # 가격 입력 검증
+            price = input("아이템 가격 입력 (숫자만 입력): ")
+            if not price.isdigit():
+                raise ValueError("가격은 숫자만 입력해야 합니다.")
+            price = int(price)
 
-            write_data(name, price, status)
-        except ValueError:
-            print("잘못된 입력입니다. 가격을 정확하게 입력해주세요.")
+            # 상태 선택
+            print("\n상태 선택:")
+            for idx, status in enumerate(statuses, start=1):
+                print(f"{idx}. {status}")
+            status_choice = int(input("상태 번호를 입력하세요: "))
+            if 1 <= status_choice <= len(statuses):
+                status = statuses[status_choice - 1]
+            else:
+                raise ValueError("잘못된 상태 선택입니다.")
+
+            # 카테고리 선택
+            print("\n카테고리 선택:")
+            for idx, category in enumerate(categories, start=1):
+                print(f"{idx}. {category}")
+            category_choice = int(input("카테고리 번호를 입력하세요: "))
+            if 1 <= category_choice <= len(categories):
+                category = categories[category_choice - 1]
+            else:
+                raise ValueError("잘못된 카테고리 선택입니다.")
+
+            write_data(name, price, status, category)
+        except ValueError as ve:
+            print(f"입력 오류: {ve}. 다시 시도해주세요.")
+        except Exception as e:
+            print(f"예상치 못한 오류 발생: {e}. 다시 시도해주세요.")
 
 # 메뉴 선택 함수
 def main():
