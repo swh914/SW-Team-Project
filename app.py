@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 # Firebase 서비스 계정 키 파일 경로
-cred = credentials.Certificate("C:/Users/0914s/Desktop/SWproject/serviceAccountKey.json")
+cred = credentials.Certificate("C:/Users/USER/Desktop/SWproject/serviceAccountKey.json")
 
 # Firebase 초기화
 firebase_admin.initialize_app(cred, {
