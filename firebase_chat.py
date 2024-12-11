@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 # Firebase 인증 정보 설정
-cred = credentials.Certificate("C:/Users/0914s/Desktop/SWproject/serviceAccountKey.json")  # 서비스 계정 키 파일 경로
+cred = credentials.Certificate("C:/Users/USER/Desktop/SWproject/serviceAccountKey.json")  # 서비스 계정 키 파일 경로
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://sw-project-7ef51-default-rtdb.firebaseio.com'  # Firebase Realtime Database URL
 })
