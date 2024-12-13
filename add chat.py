@@ -216,18 +216,22 @@ def send_message(chat_id, sender_id, text):
     print(f"{sender_id}: {text}")
 
 # 🔹 실시간 메시지 리스닝 기능
-def listen_messages(chat_id):
+def listen_messages(chat_id, sender_id):
     ref = db.reference(f'chats/{chat_id}/messages')
 
     def stream_handler(message):
-        if message.data:
-            msg_data = message.data
+        # 메시지 데이터가 없거나 초기 동기화 데이터일 경우 무시
+        if not message.data or not isinstance(message.data, dict):
+            return
 
-            # 딕셔너리 키 존재 여부 확인
-            sender_id = msg_data.get('sender_id', 'Unknown')
-            text = msg_data.get('text', '')
+        # 메시지 데이터에서 sender_id와 text 추출
+        msg_data = message.data
+        sender = msg_data.get('sender_id', 'Unknown')
+        text = msg_data.get('text', '')
 
-            print(f"{sender_id}: {text}")
+        # 자기 자신이 보낸 메시지는 출력하지 않음
+        if sender != sender_id:
+            print(f"{sender}: {text}")
 
     ref.listen(stream_handler)
 
@@ -238,7 +242,7 @@ def chat_app():
 
     # Start listening to messages in a separate thread
     import threading
-    listener_thread = threading.Thread(target=listen_messages, args=(chat_id,))
+    listener_thread = threading.Thread(target=listen_messages, args=(chat_id, sender_id))
     listener_thread.daemon = True  # 프로그램 종료 시 리스너도 종료됩니다.
     listener_thread.start()
 
@@ -249,6 +253,7 @@ def chat_app():
             print("Exiting chat...")
             break
         send_message(chat_id, sender_id, text)
+        
 
     
 # 구매내역 화면 함수
