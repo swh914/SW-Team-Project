@@ -9,7 +9,7 @@ import threading
 import subprocess
 import win32gui, win32con
 
-
+#  pywin32 에러 날 시 10line, 810,811 line 주석처리 하세요~~
 
 cred = credentials.Certificate("C:/Users/USER/Desktop/project/serviceAccountKey.json")  # 서비스 계정 키 파일 경로
 firebase_admin.initialize_app(cred, {
@@ -21,6 +21,32 @@ categories = [
     "여성의류/잡화", "뷰티/미용", "남성의류/잡화", "스포츠/레저",
     "게임/취미", "도서/티켓/음반", "반려동물용품", "기타"
 ]
+
+
+checklists = {
+    "별로예요": [
+        "시간약속을 안 지켜요", "채팅 메시지를 읽고도 답이 없어요.",
+        "원하지 않는 가격을 계속 요구해요.", "예약만 하고 거래 시간을 명확하게 알려주지 않아요",
+        "거래 시간과 장소를 정한 후 거래 직전 취소했어요.",
+        "거래 시간과 장소를 정한 후 연락이 안돼요.",
+        "약속 장소에 나타나지 않았어요.", "상품 상태가 설명과 달라요.",
+        "반말을 사용해요.", "불친절해요."
+    ],
+    "좋아요": [
+        "물품설명이 자세해요.", "물품상태가 설명한 것과 같아요.",
+        "좋은 물품을 저렴하게 판매해요.", "나눔을 해주셨어요.",
+        "안심결제를 잘 받아줘요.", "시간 약속을 잘 지켜요.",
+        "친절하고 매너가 좋아요.", "응답이 빨라요."
+    ],
+    "최고예요": [
+        "물품설명이 자세해요.", "물품상태가 설명한 것과 같아요.",
+        "좋은 물품을 저렴하게 판매해요.", "나눔을 해주셨어요.",
+        "안심결제를 잘 받아줘요.", "시간 약속을 잘 지켜요.",
+        "친절하고 매너가 좋아요.", "응답이 빨라요."
+    ]
+}
+
+selected_checkbuttons = []
 
 current_user_id = ""
 current_user_name = ""
@@ -217,11 +243,125 @@ def show_purchase_history():
                 tk.Label(product_frame, text=f"가격: {item['price']}원", font=("Arial", 10)).pack(anchor="w", padx=10)
                 tk.Label(product_frame, text=f"카테고리: {item['category']}", font=("Arial", 10)).pack(anchor="w", padx=10)
 
+                review_button = tk.Button(product_frame, text="후기", command=lambda p=item: review_product(p, product_window))
+                review_button.pack(pady=5, padx=10, side="left")
+
 
 
     else:    
         messagebox.showinfo("알림", "데이터베이스에 저장된 상품이 없습니다.")
 
+def on_category_click(category, window, checklist_items_frame):
+    global selected_checkbuttons
+    for item in checklist_items_frame.winfo_children():
+        item.destroy()
+
+    tk.Label(checklist_items_frame, text=f"{category} 항목:", font=("Helvetica", 14, "bold")).pack()
+
+    for item in checklists.get(category, []):
+        var = tk.BooleanVar()
+        chk = tk.Checkbutton(checklist_items_frame, text=item, variable=var)
+        chk.var = var
+        chk.pack(anchor="w")
+
+        selected_checkbuttons.append((chk, var))
+
+
+def display_items(category):
+    # 선택된 항목 프레임 내 위젋 삭제
+    for item in checklist_items_frame.winfo_children():
+        item.destroy()
+
+    tk.Label(checklist_items_frame, text=f"{category} 항목:", font=("Helvetica", 14, "bold")).pack()
+
+    # 카테고리에 해당하는 각 항목을 체크박스로 생성
+    for item in checklists.get(category, []):
+        var = tk.BooleanVar()
+        chk = tk.Checkbutton(checklist_items_frame, text=item, variable=var)
+        chk.var = var  # 각 체크박스의 변수 참조 저장
+        chk.pack(anchor="w")
+
+        # 선택한 값을 저장
+        selected_checkbuttons.append((chk, var))
+
+def confirm_selection(product, review_window):
+    global selected_checkbuttons
+    selected_items = [chk.cget("text") for chk, var in selected_checkbuttons if var.get()]
+    ref = db.reference('purchase_history')
+    data = ref.get()
+
+    if selected_items:
+        if data:
+            # 제품 데이터 확인 및 리뷰 저장
+            for key, item in data.items():
+                if item == product:
+                    for idx, review in enumerate(selected_items):
+                        ref.child(key).update({
+                            f'review_{idx+1}': review
+                        })
+
+        else:
+            messagebox.showinfo("리뷰 저장", "해당 제품이 데이터베이스에 존재하지 않습니다.")
+
+    else:
+        messagebox.showinfo("리뷰 선택 확인", "선택된 항목이 없습니다.")
+    print(selected_items)
+    selected_checkbuttons = []
+    review_window.destroy()
+
+
+#후기
+def review_product(product, product_window):
+    review_window = tk.Toplevel(product_window)  # Toplevel으로 창 생성
+    review_window.title("review")
+    review_window.geometry("400x500")
+
+    category_buttons_frame = tk.Frame(review_window)
+    category_buttons_frame.pack(fill=tk.X, pady=10)
+
+    tk.Button(category_buttons_frame, text="별로예요", command=lambda: on_category_click("별로예요", review_window, checklist_items_frame)).pack(side=tk.LEFT, padx=10)
+    tk.Button(category_buttons_frame, text="좋아요", command=lambda: on_category_click("좋아요", review_window, checklist_items_frame)).pack(side=tk.LEFT, padx=10)
+    tk.Button(category_buttons_frame, text="최고예요", command=lambda: on_category_click("최고예요", review_window, checklist_items_frame)).pack(side=tk.LEFT, padx=10)
+
+    # 리뷰 창 내 항목 프레임 설정
+    checklist_items_frame = tk.Frame(review_window)
+    checklist_items_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    tk.Button(review_window, text="확인", command=lambda:confirm_selection(product, review_window)).pack(pady=10)
+
+    # 선택된 체크박스 저장 리스트
+
+
+
+
+    '''
+    ref = db.reference('items')  # 'items' 경로 참조
+    data = ref.get()
+    print("\n데이터베이스에 저장된 아이템 목록:")
+
+    reference_1 = db.reference('purchase_history')
+
+
+    if data:
+        for key, item in data.items():
+            if item == product:
+                if item['username'] == current_user_name:
+                    messagebox.showinfo("경고", "자신이 등록한 상품입니다.")
+                    break
+                reference_1.push({
+                    'seller':item['username'],
+                    'username': current_user_name,
+                    'name': item['name'],
+                    'price': item['price'],
+                    'description': item['description'],
+                    'category': item['category']
+                    })
+                user_ref = ref.child(key)  # 해당 사용자의 경로 참조
+                user_ref.delete()
+
+                product_window.destroy()
+                show_product_list()  # 삭제 후 상품 목록 다시 표시
+    '''
 
  
 # 구매내역 저장 함수 (구매한 상품을 기록할 때 사용)
