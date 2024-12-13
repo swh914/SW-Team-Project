@@ -4,22 +4,23 @@ import os
 import firebase_admin
 from firebase_admin import credentials, db
 from tkinter import messagebox
+from tkinter import scrolledtext
+import threading
+import subprocess
+import win32gui, win32con
 
-# Firebase 초기화
+
+
 cred = credentials.Certificate("C:/Users/USER/Desktop/project/serviceAccountKey.json")  # 서비스 계정 키 파일 경로
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://sw-project-7ef51-default-rtdb.firebaseio.com'  # Firebase Realtime Database URL
 })
-
 
 categories = [
     "디지털/가전", "가구/인테리어", "유아동/유아도서", "생활/가공식품",
     "여성의류/잡화", "뷰티/미용", "남성의류/잡화", "스포츠/레저",
     "게임/취미", "도서/티켓/음반", "반려동물용품", "기타"
 ]
-
-
-# 전역 변수로 회원 정보 저장
 
 current_user_id = ""
 current_user_name = ""
@@ -30,12 +31,7 @@ current_user_interests = ""  # 관심 물품
 # 회원정보 저장 함수
 def save_user(username, password, name, phone):
     global current_user_name, current_user_phone
-    '''
-    with open(DATA_FILE, "a") as file:
-        file.write(f"{username},{password},{name},{phone}\n")
-    current_user_name = name  # 회원가입 시 이름 저장
-    current_user_phone = phone  # 회원가입 시 전화번호 저장
-    '''
+
     ref = db.reference('users')  # 'items' 경로 참조
     ref.push({
         'name': name,
@@ -89,27 +85,7 @@ def login():
         messagebox.showerror("로그인 오류", "아이디와 비밀번호를 입력하세요.")
         return
 
-    '''
-    if not os.path.exists(DATA_FILE):
-        messagebox.showerror("로그인 오류", "회원정보가 없습니다. 회원가입을 진행해주세요.")
-        return
 
-    # 저장된 사용자 정보 확인
-    with open(DATA_FILE, "r") as file:
-        for line in file:
-            username, password, name, phone = line.strip().split(",")
-            if user_id == username and user_password == password:
-                messagebox.showinfo("로그인 성공", f"환영합니다, {user_id}님!")
-                root.withdraw()  # 로그인 후 기존 창을 숨김
-                global current_user_name, current_user_phone
-                current_user_name = name  # 로그인 후 이름 정보 업데이트
-                current_user_phone = phone  # 로그인 후 전화번호 정보 업데이트
-                
-                # 로그인 후 사용자 정보를 불러오기
-                load_user_info()
-                show_main_screen()  # 메인 화면으로 넘어가기
-                return
-    '''
 
     data = ref.get()
     for key, user in data.items():  # data가 딕셔너리라면
@@ -189,25 +165,10 @@ def create_bottom_tabs(parent):
         button = tk.Button(bottom_tabs_frame, text=text, command=command, width=10, height=2)
         button.pack(side="left", padx=5)
 
+
 # 채팅목록 화면 함수
 def show_chat_list():
-    chat_window = tk.Toplevel(root)
-    chat_window.title("채팅 목록")
-    chat_window.geometry("500x500")  # 창 크기 조정
-
-    # 예시로 채팅 목록을 보여주는 라벨
-    try:
-        with open("chat_list.txt", "r") as file:
-            chats = [line.strip() for line in file.readlines()]
-    except FileNotFoundError:
-        chats = []
-
-    if not chats:
-        tk.Label(chat_window, text="채팅 목록이 없습니다.", font=("Arial", 14)).pack(pady=20)
-    else:
-        for chat in chats:
-            tk.Label(chat_window, text=f"채팅방: {chat}").pack(pady=5)
-
+    subprocess.run(['python', 'C:/Users/USER/Desktop/project/chat_app.py', current_user_name])
 
 # 구매내역 화면 함수
 def show_purchase_history():
@@ -262,25 +223,7 @@ def show_purchase_history():
         messagebox.showinfo("알림", "데이터베이스에 저장된 상품이 없습니다.")
 
 
-    '''
-    purchase_window = tk.Toplevel(root)
-    purchase_window.title("구매내역")
-    purchase_window.geometry("500x500")  # 창 크기 조정
-
-    # 구매내역을 나타내는 라벨
-    try:
-        with open("purchase_history.txt", "r") as file:
-            purchases = [line.strip().split(",") for line in file.readlines()]
-    except FileNotFoundError:
-        purchases = []
-
-    if not purchases:
-        tk.Label(purchase_window, text="구매내역이 없습니다.", font=("Arial", 14)).pack(pady=20)
-    else:
-        for purchase in purchases:
-            tk.Label(purchase_window, text=f"상품명: {purchase[0]}, 가격: {purchase[1]}, 날짜: {purchase[2]}").pack(pady=5)
-    '''
-
+ 
 # 구매내역 저장 함수 (구매한 상품을 기록할 때 사용)
 def save_purchase_history(product_name, product_price):
     from datetime import datetime
@@ -479,11 +422,9 @@ def purchase_product(product, product_window):
                 user_ref = ref.child(key)  # 해당 사용자의 경로 참조
                 user_ref.delete()
 
+                product_window.destroy()
+                show_product_list()  # 삭제 후 상품 목록 다시 표시
 
-
-
-    product_window.destroy()
-    show_product_list()  # 삭제 후 상품 목록 다시 표시
 
 # 내 정보 화면
 def show_user_info():
@@ -543,21 +484,6 @@ def load_user_info():
     current_user_interests = ""
 
 
-'''
-def filter_items_by_keyword(keyword):
-
-    ref = db.reference('items')
-    data = ref.get()
-    filtered_items = []
-
-    if data:
-        for key, item in data.items():
-            # 물품 이름이나 설명에 검색어가 포함된 경우 필터링
-            if keyword.lower() in item.get('name', '').lower() or keyword.lower() in item.get('description', '').lower():
-                filtered_items.append(item)
-
-    return filtered_items
-'''
 
     # 직접 검색 함수
 def direct_search():
@@ -568,22 +494,7 @@ def direct_search():
     tk.Label(search_query_window, text="검색 키워드 입력").pack(pady=10)
     search_entry = tk.Entry(search_query_window, width=50)
     search_entry.pack(pady=10)
-    '''
-    def search():
-        keyword = search_entry.get().strip().lower()
 
-        if keyword:
-            filtered_items = filter_items_by_keyword(keyword)
-
-            if filtered_items:
-                print(f"\n'{keyword}' 검색어로 검색된 물품:")
-                for item in filtered_items:
-                    print(f"{item['name']} - {item['category']} - {item['price']}원")
-            else:
-                print(f"\n'{keyword}' 검색어에 해당하는 물품이 없습니다.")
-        else:
-            print("검색어를 입력해주세요.")
-    '''
     def search():
 
         # Firebase에서 데이터 가져오기
@@ -642,29 +553,7 @@ def direct_search():
 
 
 
-        '''
-        if not keyword:
-            messagebox.showerror("검색 오류", "검색 키워드를 입력해주세요.")
-            return
 
-        products_data = products_ref.get()
-
-        result_window = tk.Toplevel(root)
-        result_window.title(f"검색 결과: {keyword}")
-
-        if products_data:
-            for key, product in products_data.items():
-                if keyword in product.get("name", "").lower():
-                    product_frame = tk.Frame(result_window, borderwidth=1, relief="solid", padx=10, pady=10)
-                    product_frame.pack(fill="x", padx=5, pady=5)
-
-                    tk.Label(product_frame, text=f"상품명: {product['name']}", font=("Arial", 14)).pack(anchor="w")
-                    tk.Label(product_frame, text=f"가격: {product['price']}원", font=("Arial", 12)).pack(anchor="w")
-                    tk.Label(product_frame, text=f"카테고리: {product['category']}", font=("Arial", 12)).pack(anchor="w")
-                    tk.Label(product_frame, text=f"설명: {product.get('description', '')}", font=("Arial", 12), wraplength=500).pack(anchor="w")
-        else:
-            tk.Label(result_window, text="등록된 상품이 없습니다.", font=("Arial", 16), fg="red").pack()
-        '''
     tk.Button(search_query_window, text="검색", command=search).pack()
 
 # 카테고리 검색 함수
@@ -777,5 +666,8 @@ tk.Button(root, text="회원가입", command=open_register_window, font=("Arial"
 footer_label = tk.Label(root, text="울산마켓과 함께 하는 즐거운 거래!", font=("Arial", 12, "italic"), bg="#A8D08D", fg="white")
 footer_label.pack(pady=30)
 
+
+hide = win32gui.GetForegroundWindow()
+win32gui.ShowWindow(hide , win32con.SW_HIDE)
 # GUI 실행
 root.mainloop()
