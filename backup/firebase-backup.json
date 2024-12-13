@@ -1,0 +1,158 @@
+{
+  "chats": {
+    "room1": {
+      "messages": {
+        "-ODzwg_KlYzSgN9VRx-d": {
+          "sender_id": "woohyuk",
+          "text": "hello"
+        },
+        "-ODzzTgA_7HDPE364stq": {
+          "sender_id": "woohyuk",
+          "text": "hello"
+        },
+        "-ODzzUwlmEVRCBV0J9Un": {
+          "sender_id": "woohyuk",
+          "text": "test123"
+        },
+        "-ODzzg9nE_RoY5752X3y": {
+          "sender_id": "park",
+          "text": "1"
+        },
+        "-ODzzgHtwwXjPFHr458Q": {
+          "sender_id": "park",
+          "text": "2"
+        },
+        "-OE--7OSvYh-n5JrbAHl": {
+          "sender_id": "woohyuk",
+          "text": "rrr"
+        },
+        "-OE-4m0mVkXeotp8ruNb": {
+          "sender_id": "lee",
+          "text": "책꽂이 판매합니다~~~"
+        },
+        "-OE-CS5dQtbcz3yWZEku": {
+          "sender_id": "123",
+          "text": "1"
+        }
+      }
+    }
+  },
+  "items": {
+    "-OE-4SXpFLSUd82t_7Uc": {
+      "category": "도서/티켓/음반",
+      "description": "책입니다",
+      "name": "책",
+      "price": "12000",
+      "username": "lee"
+    },
+    "-OE-4W_VXFE2s3-ZLFAq": {
+      "category": "가구/인테리어",
+      "description": "책꽂ㅣ임",
+      "name": "책꽂이",
+      "price": "5000",
+      "username": "lee"
+    }
+  },
+  "purchase_history": {
+    "-ODz5_XFLib_udAXnGHK": {
+      "category": "디지털/가전",
+      "description": "regdf",
+      "name": "aaaaa",
+      "price": "56567",
+      "review_1": "시간약속을 안 지켜요",
+      "review_2": "채팅 메시지를 읽고도 답이 없어요.",
+      "review_3": "원하지 않는 가격을 계속 요구해요.",
+      "username": "lee"
+    },
+    "-ODz76DpRdtrgQ70ofQq": {
+      "category": "여성의류/잡화",
+      "description": "sdfasf",
+      "name": "asdfasd",
+      "price": "254363",
+      "username": "lee"
+    },
+    "-ODzFOEWTRD2V5j7LDRh": {
+      "category": "디지털/가전",
+      "description": "aaa",
+      "name": "aa",
+      "price": "aaa",
+      "username": "lee"
+    },
+    "-ODzFkBZ2CT5XHZxlco5": {
+      "category": "디지털/가전",
+      "description": "fff",
+      "name": "aa",
+      "price": "222222",
+      "username": "lee"
+    },
+    "-ODzItbt3HoNtSwq34n6": {
+      "category": "가구/인테리어",
+      "description": "fff",
+      "name": "aaa",
+      "price": "333",
+      "seller": 1,
+      "username": "lee"
+    },
+    "-ODzma5ZuDJ8YlyM5exo": {
+      "category": "기타",
+      "description": "기프티콘",
+      "name": "기프티콘",
+      "price": "20000",
+      "review_1": "물품설명이 자세해요.",
+      "review_2": "나눔을 해주셨어요.",
+      "review_3": "친절하고 매너가 좋아요.",
+      "seller": "1",
+      "username": "lee"
+    },
+    "-OE-458Ye7kzxdnL-ot3": {
+      "category": "생활/가공식품",
+      "description": "콜라",
+      "name": "펩시제로 1.5L",
+      "price": "3000",
+      "review_1": "물품설명이 자세해요.",
+      "review_2": "물품상태가 설명한 것과 같아요.",
+      "seller": "woohyuk",
+      "username": "lee"
+    }
+  },
+  "users": {
+    "-ODv_GHpYnJ3L6_p9KB-": {
+      "address": "q",
+      "interests": "q",
+      "name": "q",
+      "password": "q",
+      "phone": "q",
+      "username": "q"
+    },
+    "-ODviB5JJfXX4DsyCFs9": {
+      "name": "1",
+      "password": "1",
+      "phone": "0101",
+      "username": "1"
+    },
+    "-ODvlX-VX9_wbUXkz8uo": {
+      "name": "1",
+      "password": "1",
+      "phone": "0101",
+      "username": "1"
+    },
+    "-ODxf0fvp61AU37wQH12": {
+      "name": "lee",
+      "password": "sss",
+      "phone": "01011111111",
+      "username": "sss"
+    },
+    "-ODy5k49osw9u_MuopnB": {
+      "name": "123",
+      "password": "123",
+      "phone": "010123",
+      "username": "123"
+    },
+    "-ODzwciGLd5aNh8ntjgZ": {
+      "name": "woohyuk",
+      "password": "123",
+      "phone": "01001012345678",
+      "username": "shin"
+    }
+  }
+}
